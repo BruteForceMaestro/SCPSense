@@ -10,68 +10,13 @@ namespace SCPSense
 {
     static internal class API
     {
-        static private List<Player> SCPs = new();
         static private float interval = 1f;
         static public IEnumerator<float> InfoLoop()
         {
             while (true)
             {
+                SendHints();
                 yield return Timing.WaitForSeconds(interval);
-                string hint = GetHint().ToString();
-                string[] lines = hint.Split('\n');
-                foreach (Player player in SCPs)
-                {
-                    if (Main.Instance.Config.SeeDistance)
-                    {
-                        int index = 0;
-                        var Sb = new StringBuilder("<size=");
-                        if (Main.TextConfigs.TryGetValue(player.UserId, out var textConfig))
-                        {
-                            Sb.Append(textConfig.size);
-                            Sb.Append("%><align=\"");
-                            Sb.Append(textConfig.align);
-                            Sb.Append("\">");
-                        }
-                        else
-                        {
-                            Sb.Append("60%><align=\"left\">");
-                        }
-                        foreach (string line in lines)
-                        {
-                            if (index == 0) // ignoring that first line with Rich Text Tags. ugly, but works.
-                            {
-                                index++;
-                                continue;
-                            }
-                            var player1 = SCPs[index - 1];
-                            if (player1 == player)
-                            {
-                                index++;
-                                continue;
-                            }
-                            Sb.Append(line);
-                            if (player1.Role == RoleType.Scp079)
-                            {
-                                Sb.Append("Distance: ");
-                                Sb.Append(Math.Round(Vector3.Distance(player.Position, player1.Camera.targetPosition.position)));
-                                Sb.Append(" m");
-                            }
-                            else
-                            {
-                                Sb.Append("Distance: ");
-                                Sb.Append(Math.Round(Vector3.Distance(player.Position, player1.Position)));
-                                Sb.Append(" m");
-                            }
-                            Sb.Append("\n");
-                            index++;
-                        }
-                        player.ShowHint(Sb.ToString(), interval);
-                    }
-                    else
-                    {
-                        player.ShowHint(hint, interval);
-                    }
-                }
             }
         }
 
@@ -92,38 +37,68 @@ namespace SCPSense
             }
         }
 
-        static private StringBuilder GetHint()
+        static private void SendHints()
         {
-            var hint = new StringBuilder();
-            SCPs.Clear();
-            foreach (Player player in Player.List)
+            foreach (Player player in Player.Get(Team.SCP))
             {
-                if (player.IsScp && player.IsAlive)
+                var hint = new StringBuilder();
+                hint.Append("<size=");
+                if (Main.TextConfigs.TryGetValue(player.UserId, out var textConfig))
                 {
+                    hint.Append(textConfig.size);
+                    hint.Append("%><align=\"");
+                    hint.Append(textConfig.align);
+                    hint.Append("\">");
+                }
+                else
+                {
+                    hint.Append("60%><align=\"left\">");
+                }
+                foreach (Player teammate in Player.Get(Team.SCP))
+                {
+                    if (teammate == player)
+                    {
+                        continue;
+                    }                    
                     hint.Append("\n");
-                    SCPs.Add(player);
-                    string RoleName = Regex.Replace(player.Role.ToString().ToUpper(), @"(?<=SCP)", "-");
-                    hint.Append(player.Nickname);
+                    string RoleName = Regex.Replace(teammate.Role.ToString().ToUpper(), @"(?<=SCP)", "-");
+                    hint.Append(teammate.Nickname);
                     hint.Append(" | ");
                     hint.Append(RoleName);
                     hint.Append(" | ");
-                    if (player.Role != RoleType.Scp079 && Main.Instance.Config.SeeHP)
+                    if (teammate.Role != RoleType.Scp079 && Main.Instance.Config.SeeHP)
                     {
-                        if (player.ArtificialHealth > 0)
+                        if (teammate.ArtificialHealth > 0)
                         {
                             hint.Append("<color=green>AHP: ");
-                            hint.Append((int)Math.Round((double)(100 * player.ArtificialHealth) / player.MaxArtificialHealth)); // calculates percetage
+                            hint.Append((int)Math.Round((double)(100 * teammate.ArtificialHealth) / teammate.MaxArtificialHealth)); // calculates percetage
                             hint.Append("%</color> | ");
                         }
                         hint.Append("<color=");
-                        hint.Append(GetHPColor(player));
+                        hint.Append(GetHPColor(teammate));
                         hint.Append(">HP: ");
-                        hint.Append((int)Math.Round((double)(100 * player.Health) / player.MaxHealth));
+                        hint.Append((int)Math.Round((double)(100 * teammate.Health) / teammate.MaxHealth));
                         hint.Append("%</color> | ");
                     }
+
+                    if (Main.Instance.Config.SeeDistance)
+                    {
+                        if (teammate.Role == RoleType.Scp079)
+                        {
+                            hint.Append("Distance: ");
+                            hint.Append(Math.Round(Vector3.Distance(player.Position, teammate.Camera.targetPosition.position)));
+                            hint.Append(" m");
+                        }
+                        else
+                        {
+                            hint.Append("Distance: ");
+                            hint.Append(Math.Round(Vector3.Distance(player.Position, teammate.Position)));
+                            hint.Append(" m");
+                        }
+                    }
                 }
+                player.ShowHint(hint.ToString(), interval);
             }
-            return hint;
         }
     }
 }
