@@ -35,7 +35,7 @@ namespace SCPSense
             {
                 Main.TextConfigs.Add(player.UserId, new TextConfig(selected_size));
             }
-            Binary.WriteToBinaryFile(Main.filePath, Main.TextConfigs);
+            Binary.WriteToBinaryFile(Main.Instance.Config.SavePath, Main.TextConfigs);
             response = "Changes applied.";
             return true;
         }

@@ -10,16 +10,15 @@ namespace SCPSense
     {
         EventHandlers handlers = new();
         internal static Dictionary<string, TextConfig> TextConfigs = new();
-        internal static string filePath = Environment.ExpandEnvironmentVariables(@"%appdata%\EXILED\Configs\SCPSenseConfigs.bin");
         public static Main Instance { get; set; }
         private void GetOrCreateTextConfig()
         {
-            if (!File.Exists(filePath))
+            if (!File.Exists(Main.Instance.Config.SavePath))
             {
-                Binary.WriteToBinaryFile(filePath, TextConfigs);
+                Binary.WriteToBinaryFile(Main.Instance.Config.SavePath, TextConfigs);
                 return;
             }
-            TextConfigs = Binary.ReadFromBinaryFile<Dictionary<string, TextConfig>>(filePath);
+            TextConfigs = Binary.ReadFromBinaryFile<Dictionary<string, TextConfig>>(Main.Instance.Config.SavePath);
         }
         public override void OnEnabled()
         {

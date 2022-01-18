@@ -3,6 +3,7 @@ using MEC;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -55,11 +56,7 @@ namespace SCPSense
                     hint.Append("60%><align=\"left\">");
                 }
                 foreach (Player teammate in Player.Get(Team.SCP))
-                {
-                    if (teammate == player)
-                    {
-                        continue;
-                    }                    
+                {                 
                     hint.Append("\n");
                     string RoleName = Regex.Replace(teammate.Role.ToString().ToUpper(), @"(?<=SCP)", "-");
                     hint.Append(teammate.Nickname);
