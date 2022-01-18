@@ -8,6 +8,8 @@ s_c_p_sense:
   see_h_p: true
   # SCPs can see the distance between them.
   see_distance: true
+  # Path for the plugin file. Required to change for Linux users as %AppData% is a windows only feature.
+  save_path: // exiled folder on windows.
 ```
 ## Commands 
 Those commands are in the Client Console, executable by every user that joins the server.
