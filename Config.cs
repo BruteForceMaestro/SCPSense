@@ -1,5 +1,5 @@
-﻿using Exiled.API.Interfaces;
-using Exiled.API.Features;
+﻿using Exiled.API.Features;
+using Exiled.API.Interfaces;
 using System.ComponentModel;
 using System.IO;
 
@@ -13,6 +13,6 @@ namespace SCPSense
         [Description("SCPs can see the distance between them.")]
         public bool SeeDistance { get; set; } = true;
         [Description("Path for the plugin file. Required to change for Linux users as %AppData% is a windows only feature.")]
-        public string SavePath { get; set; } = Path.Combine(Paths.AppData, @"EXILED\Configs\SCPSenseConfigs.bin");
+        public string SavePath { get; set; } = Path.Combine(Paths.Configs, "SSC.bin");
     }
 }
